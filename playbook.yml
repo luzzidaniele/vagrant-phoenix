@@ -1,0 +1,116 @@
+---
+- hosts: phoenix
+  user: vagrant
+  gather_facts: no
+  tasks:
+    - name: Update packages
+      sudo: yes
+      apt: update_cache=yes
+      tags:
+        - update
+
+    - name: Dependencies
+      sudo: yes
+      apt:
+        pkg: "{{ item }}"
+        state: installed
+      with_items:
+        - software-properties-common
+        - curl
+        - htop
+      tags:
+        - update
+
+    - name: Postgres key download
+      sudo: yes
+      get_url: url=https://www.postgresql.org/media/keys/ACCC4CF8.asc dest=/tmp/ force=true
+      tags:
+        - update
+
+    - name: Postgres setup
+      sudo: yes
+      command: "{{ item }}" 
+      with_items:
+        - apt-key add ACCC4CF8.asc
+        - sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" >> /etc/apt/sources.list.d/postgresql.list'
+      args:
+        chdir: /tmp/
+      tags:
+        - update
+
+    - name: Nodejs setup
+      sudo: yes
+      shell: curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+      tags:
+        - update
+
+    - name: Get Erlang Solutions
+      sudo: true
+      get_url: url=https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb dest=/tmp/ force=true
+      tags:
+        - erlang
+
+    - name: Install Erlang Solutions
+      sudo: true
+      apt: deb="/tmp/erlang-solutions_1.0_all.deb" state=present
+      tags:
+        - erlang
+
+    - name: Install the Erlang/OTP platform
+      sudo: true
+      apt: 
+        name: esl-erlang
+        update_cache: yes
+        state: installed
+      tags:
+        - erlang
+
+    - name: Install Elixir
+      sudo: yes
+      apt: 
+        name: elixir
+        state: installed
+      tags:
+        - elixir
+
+    - name: Install Hex
+      sudo: yes
+      command: mix local.hex --force
+      tags:
+        - phoenix
+
+    - name: Install Phoenix
+      sudo: yes
+      command: mix archive.install https://github.com/phoenixframework/archives/raw/master/phoenix_new.ez --force
+      tags:
+        - phoenix
+
+    - name: Setting timezone
+      sudo: yes
+      command: ln -sf /usr/share/zoneinfo/UTC /etc/localtime
+      tags:
+        - postgresql
+
+    - name: Install postgresql
+      sudo: yes
+      apt:
+        pkg: "{{ item }}"
+        state: installed
+      with_items:
+        - postgresql
+        - postgresql-contrib
+      tags:
+        - postgresql
+
+    - name: Configure postgresql user
+      command: sudo -u postgres createuser --superuser vagrant
+      tags:
+        - postgresql
+
+    - name: Install nodejs
+      sudo: yes
+      apt:
+        name: nodejs
+        state: installed
+      tags: 
+        - nodejs
