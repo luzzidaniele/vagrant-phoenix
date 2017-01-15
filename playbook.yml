@@ -18,6 +18,8 @@
         - software-properties-common
         - curl
         - htop
+	- inotify-tools
+	- language-pack-it
       tags:
         - update
 

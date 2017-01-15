@@ -12,7 +12,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.define "phoenix" do |phoenix|
     phoenix.vm.hostname = "phoenix"
     phoenix.vm.network :private_network, ip: "172.16.16.16"
-    phoenix.vm.synced_folder "~/Code/droppay-web-pdp-app", "/vagrant/droppay-web-pdp-app", create: true
+    phoenix.vm.synced_folder "~/Code/a-tono/droppay-web-public-pdp", "/vagrant/droppay-web-public-pdp", create: true
     phoenix.vm.network "forwarded_port", guest: 4000, host: 4000
     
     phoenix.ssh.forward_agent = true
